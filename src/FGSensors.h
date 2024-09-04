@@ -13,7 +13,7 @@
 ==========================================================================
 
        Option data bits offset 41 default is 0b11111111
-       00 | 00 | 00 | 0 | 0
+       11 | 11 | 11 | 1 | 1
        1  |  2 |  3 | 4 | 5
        toggle bits for options
        1: 2 bit option for calibration type
@@ -50,7 +50,7 @@
 #define IIC_OPTION_BYTE 0b11111111
 #define IIC_DEBUG
 // #define IIC_OLD_IMPL
-#define IIC_MIN_INTERVAL 1000
+#define IIC_MIN_INTERVAL 10
 
 #ifdef IIC_DEBUG
 #define DEBUG(...) printf(__VA_ARGS__)
@@ -62,8 +62,8 @@
 #define I2C_SDA 5
 #define I2C_SCL 4
 #elif defined(ESP32)
-#define I2C_SDA 21
-#define I2C_SCL 22
+#define I2C_SDA 4
+#define I2C_SCL 5
 #else
 //#define I2C_SDA 4
 //#define I2C_SCL 5
@@ -134,7 +134,7 @@ public:
    * @return true
    * @return false
    */
-  bool fgUpdate(uint16_t interval);
+  bool fgUpdate(uint16_t interval, uint16_t offset = 0);
   /**
    * @brief
    *
@@ -143,11 +143,12 @@ public:
    */
   float fgReadValue(uint8_t offset);
   /**
-   * @brief
+   * @brief scan i2c devices
    *
    */
   void fgScan();
 
+  
 private:
   TwoWire *_wire = NULL;
   uint8_t _sensor_register[IIC_REGISTER_LENGTH] = {0x00};
@@ -155,6 +156,7 @@ private:
   uint8_t _data_byte = 0x00;
   float _data_float = 0.0f;
   bool _read_available = false;
+  bool _started_flag = false;
   uint32_t _last_timeout = 0;
   byte _sensor_address = 0x00;
   int fgWriteByte(uint8_t offset, byte new_data);

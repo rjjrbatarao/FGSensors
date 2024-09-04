@@ -25,7 +25,8 @@ FGSensors::~FGSensors()
 void FGSensors::begin()
 {
 #if defined(ESP8266) || defined(ESP32)
-    _wire->begin(I2C_SDA, I2C_SCL, 400000);
+    //_wire->begin(I2C_SDA, I2C_SCL, 400000);
+	_wire->begin(I2C_SDA, I2C_SCL);
 #else
     _wire->begin();
 #endif
@@ -80,8 +81,9 @@ int FGSensors::fgSetCalibration(uint8_t offset, float new_value)
  * @return true
  * @return false
  */
-bool FGSensors::fgUpdate(uint16_t interval)
+bool FGSensors::fgUpdate(uint16_t interval, uint16_t offset)
 {
+
     if (_last_timeout == 0)
     {
         return false;
@@ -92,7 +94,13 @@ bool FGSensors::fgUpdate(uint16_t interval)
     }
     if (millis() - _last_timeout > interval)
     {
-        _last_timeout = millis();
+		if(!_started_flag){
+			_started_flag = true;
+			_last_timeout = millis() - offset;
+		} else{
+			_last_timeout = millis();
+		}
+        
         byte n_receive = _wire->requestFrom(_sensor_address, IIC_REGISTER_LENGTH);
         if (n_receive == IIC_REGISTER_LENGTH)
         {
@@ -176,6 +184,7 @@ int FGSensors::fgWriteBytes(uint8_t offset, uint8_t *new_data)
     for (int i = 0; i < 4; i++)
     {
         _wire->write(new_data[i]);
+		delay(1);
     }
     int error = _wire->endTransmission();
 
@@ -238,6 +247,7 @@ bool FGSensors::fgIICReady()
     {
         _wire->beginTransmission(_sensor_address);
         ready = (_wire->endTransmission() == 0);
+		delay(1);
     }
     return ready;
 }
@@ -252,6 +262,7 @@ void FGSensors::fgScan()
     uint8_t cnt = 0;
     for (uint8_t i = 0; i < 128; i++)
     {
+		delay(1);
         Wire.beginTransmission(i);
         uint8_t ec = Wire.endTransmission(true);
         if (ec == 0)
