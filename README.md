@@ -2,8 +2,8 @@
 Farmgate sensors library v1.0.0
 
 ## Supported sensors
-* EC Sensor
-* PH Sensor
+* EC Isolated Digital Sensor
+* PH Isolated Digital Sensor
 
 ## Features EC and PH Sensors
 * Temperature compensation
